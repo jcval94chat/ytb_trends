@@ -178,6 +178,12 @@ def print_trends(pytrends, keywords, countries, timeframes=['now 7-d', 'today 1-
 
 def save_dataframe_to_gsheet(dataframe, spreadsheet_id):
     try:
+        # Convertir todas las columnas datetime a strings
+        datetime_columns = dataframe.select_dtypes(include=['datetime64[ns]', 'datetime64[ns, UTC]']).columns
+        for col in datetime_columns:
+            dataframe[col] = dataframe[col].dt.strftime('%Y-%m-%d %H:%M:%S')
+            logger.info(f"Columna '{col}' convertida a string.")
+
         # Abrir la hoja de cálculo
         sheet = gc.open_by_key(spreadsheet_id)
 
