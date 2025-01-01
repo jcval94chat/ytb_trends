@@ -16,6 +16,11 @@ from utils.google_utils import (
     upload_dataframe_to_google_sheet
 )
 
+from utils.preprocess_keys import (
+    preprocesar_keys
+)
+
+
 # Configuración de logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -206,12 +211,22 @@ def save_dataframe_to_gsheet(dataframe, spreadsheet_id):
         logger.error(f"Error al actualizar la hoja de cálculo con ID '{spreadsheet_id}': {str(e)}")
         logger.error(traceback.format_exc())
 
+
+def get_df_kw(df_key_words):
+    df_key_words['mean_interest'] = df_key_words['mean_interest'].astype(float)
+    mediana_interes = min(df_key_words['mean_interest'].quantile(0.35),1)
+    df_key_words_ = df_key_words[df_key_words['mean_interest']>=mediana_interes]
+    df_key_words_ = df_key_words_.sort_values('mean_interest', ascending=False)
+    return df_key_words_
+    
+
 # Ejemplo de uso
 if __name__ == "__main__":
 
 
     # 1. Leer secrets de variables de entorno (definidas en GitHub Actions, por ejemplo)
     folder_id = os.environ.get("SECRET_FOLDER_ID", None)
+    folder_id_2 = os.environ.get("SECRET_FOLDER_ID_DF", None)
     creds_file = os.environ.get("SECRET_CREDS_FILE", None)
     spreadsheet_id_kw = os.environ.get("SPREADSHEET_ID_KW", None)
 
@@ -221,8 +236,20 @@ if __name__ == "__main__":
         
     # 2. Obtener DataFrame desde Google Sheets en una carpeta de Drive
     logger.info(f"Obteniendo datos de la carpeta con ID='{folder_id}'...")
-    combined_df = get_sheets_data_from_folder(
+    df_key_words = get_sheets_data_from_folder(
         folder_id=folder_id,
+        creds_file=creds_file,
+        days=30,        # Ajusta según tus necesidades
+        max_files=60,   # Límite de archivos a leer
+        sleep_seconds=2 # Pausa entre lecturas para no saturar la API
+    )
+    if df_key_words is None:
+        logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
+        return
+        
+    logger.info(f"Obteniendo datos de la carpeta con ID='{folder_id_2}'...")
+    combined_df_keys = get_sheets_data_from_folder(
+        folder_id=folder_id_2,
         creds_file=creds_file,
         days=30,        # Ajusta según tus necesidades
         max_files=60,   # Límite de archivos a leer
@@ -232,6 +259,10 @@ if __name__ == "__main__":
         logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
         return
         
+    df_key_words_ = get_df_kw(df_key_words)
+    keywords_permitidos = [(k,c) for k, c in df_key_words_[['keyword','country']].values]
+    
+    concatenated_df, df_daily_filtrado_BS, df_daily_filtrado_WS  = preprocesar_keys(combined_df_keys)
     
     # Inicializar pytrends
     pytrends = TrendReq(hl='es-MX', tz=360)
