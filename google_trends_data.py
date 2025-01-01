@@ -11,6 +11,11 @@ from google.oauth2.service_account import Credentials
 import base64
 import traceback
 
+from utils.google_utils import (
+    get_sheets_data_from_folder,
+    upload_dataframe_to_google_sheet
+)
+
 # Configuración de logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
