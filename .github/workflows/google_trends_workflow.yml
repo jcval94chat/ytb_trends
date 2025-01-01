@@ -28,5 +28,9 @@ jobs:
           GOOGLE_SHEETS_CREDS_BASE64: ${{ secrets.GOOGLE_SHEETS_CREDS_BASE64 }}
           SPREADSHEET_ID_TRENDS: ${{ secrets.SPREADSHEET_ID_TRENDS }}
           SPREADSHEET_ID_KEYWORDS: ${{ secrets.SPREADSHEET_ID_KEYWORDS }}
+          SECRET_FOLDER_ID: ${{ secrets.SECRET_FOLDER_ID }}
+          SECRET_FOLDER_ID_DF: ${{ secrets.SECRET_FOLDER_ID_DF }}
+          SPREADSHEET_ID_KW: ${{ secrets.SPREADSHEET_ID_KW }}
+          SECRET_CREDS_FILE: ${{ secrets.SECRET_CREDS_FILE }}
         run: |
           python google_trends_data.py
