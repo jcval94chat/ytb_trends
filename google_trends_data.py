@@ -208,6 +208,31 @@ def save_dataframe_to_gsheet(dataframe, spreadsheet_id):
 
 # Ejemplo de uso
 if __name__ == "__main__":
+
+
+    # 1. Leer secrets de variables de entorno (definidas en GitHub Actions, por ejemplo)
+    folder_id = os.environ.get("SECRET_FOLDER_ID", None)
+    creds_file = os.environ.get("SECRET_CREDS_FILE", None)
+    spreadsheet_id_kw = os.environ.get("SPREADSHEET_ID_KW", None)
+
+    if not folder_id or not creds_file:
+        logger.error("No se pudieron obtener 'folder_id' o 'creds_file' desde los secrets.")
+        return  # Terminamos, pues no hay cómo continuar
+        
+    # 2. Obtener DataFrame desde Google Sheets en una carpeta de Drive
+    logger.info(f"Obteniendo datos de la carpeta con ID='{folder_id}'...")
+    combined_df = get_sheets_data_from_folder(
+        folder_id=folder_id,
+        creds_file=creds_file,
+        days=30,        # Ajusta según tus necesidades
+        max_files=60,   # Límite de archivos a leer
+        sleep_seconds=2 # Pausa entre lecturas para no saturar la API
+    )
+    if combined_df is None:
+        logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
+        return
+        
+    
     # Inicializar pytrends
     pytrends = TrendReq(hl='es-MX', tz=360)
 
