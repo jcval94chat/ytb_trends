@@ -268,7 +268,7 @@ if __name__ == "__main__":
     ]
 
     # Obtener tendencias
-    tendencias = get_tendencias(pytrends, countries, football_keywords, plot=False)
+    # tendencias = get_tendencias(pytrends, countries, football_keywords, plot=False)
 
     # Lista de palabras clave
     # keywords = ['python', 'data science', 'machine learning']
@@ -458,8 +458,8 @@ if __name__ == "__main__":
     # Guardar los DataFrames en diferentes documentos
     try:
         # Guardar las tendencias generales
-        trends_df = tendencias['trends_data']
-        save_dataframe_to_gsheet(trends_df, spreadsheet_id_trends)
+        # trends_df = tendencias['trends_data']
+        # save_dataframe_to_gsheet(trends_df, spreadsheet_id_trends)
 
         # Guardar el interés por palabras clave
         interest_df = interes['keywords_interest']
