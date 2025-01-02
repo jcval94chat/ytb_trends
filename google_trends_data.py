@@ -128,10 +128,9 @@ def print_trends(pytrends, keywords, countries, timeframes=['now 7-d', 'today 1-
     Retorna un diccionario de DataFrames con columnas consistentes.
     """
     trends_list = []  # Lista para almacenar los datos de interés por palabra clave
+    
+    keywords_chunks = split_list(keywords, 7)
 
-    keywords_chunks = split_list(keywords, 5)
-
-    keywords = [k for k, _ in keywords]
     logger.info(f"Keywords Totales='{str(len(keywords))}'...")
     
     for country_name, codes in countries.items():
@@ -139,7 +138,9 @@ def print_trends(pytrends, keywords, countries, timeframes=['now 7-d', 'today 1-
         for timeframe in timeframes:
             for chunk in keywords_chunks:
                 try:
+                    chunk = list(set([k for k, _ in chunk]))
                     logger.info(f"Construyendo payload para {chunk} en {country_name}, periodo {timeframe}")
+                    
                     pytrends.build_payload(chunk, timeframe=timeframe, geo=country_code_geo)
                     interest_over_time = pytrends.interest_over_time()
 
