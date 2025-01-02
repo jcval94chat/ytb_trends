@@ -232,6 +232,8 @@ if __name__ == "__main__":
     folder_id_2 = os.environ.get("SECRET_FOLDER_ID_DF", None)
     creds_file = os.environ.get("SECRET_CREDS_FILE", None)
     spreadsheet_id_kw = os.environ.get("SPREADSHEET_ID_KW", None)
+    spreadsheet_id_bbdd = os.environ.get("SPREADSHEET_ID_BBDD", None)
+
     
     if not folder_id or not creds_file:
         logger.error("No se pudieron obtener 'folder_id' o 'creds_file' desde los secrets.")
@@ -260,7 +262,7 @@ if __name__ == "__main__":
         max_files=60,   # Límite de archivos a leer
         sleep_seconds=2 # Pausa entre lecturas para no saturar la API
     )
-    if combined_df is None:
+    if combined_df_keys is None:
         logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
         # return
         exit(1)
@@ -389,3 +391,16 @@ if __name__ == "__main__":
         logger.error(f"Error al guardar los datos en Google Sheets: {str(e)}")
         logger.error(traceback.format_exc())
         exit(1)
+
+    # 9. Subir DataFrames a Google Sheets (opcional)
+    if spreadsheet_id_bbdd:
+        logger.info("Subiendo DataFrames a Google Sheets...")
+
+        # Ejemplos de subidas
+        exito = upload_dataframe_to_google_sheet(df_key_words_, creds_file, spreadsheet_id_kw, 'Hoja 1')
+        exito = upload_dataframe_to_google_sheet(df_daily_filtrado_BS, creds_file, spreadsheet_id_bbdd, 'bbdd_best')
+        exito = upload_dataframe_to_google_sheet(df_daily_filtrado_WS, creds_file, spreadsheet_id_bbdd, 'bbdd_worst')
+        exito = upload_dataframe_to_google_sheet(concatenated_df, creds_file, spreadsheet_id_bbdd, 'metrics')
+
+
+    logger.info("¡Proceso finalizado con éxito!")
