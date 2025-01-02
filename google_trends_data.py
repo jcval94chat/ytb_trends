@@ -132,7 +132,7 @@ def print_trends(pytrends, keywords, countries, timeframes=['now 7-d', 'today 1-
     keywords_chunks = split_list(keywords, 5)
 
     keywords = [k for k, _ in keywords]
-    logger.info(f"Keywords Totales='{str(len(keywords)}'...")
+    logger.info(f"Keywords Totales='{str(len(keywords))}'...")
     
     for country_name, codes in countries.items():
         country_code_geo = codes['geo']
@@ -333,10 +333,6 @@ if __name__ == "__main__":
 
     # Obtener tendencias
     # tendencias = get_tendencias(pytrends, countries, football_keywords, plot=False)
-
-    # Lista de palabras clave
-    # keywords = ['python', 'data science', 'machine learning']
-
     # keywords = [
     #     "economía de la atención"
     # ]
