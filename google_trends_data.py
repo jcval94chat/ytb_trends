@@ -232,10 +232,11 @@ if __name__ == "__main__":
     folder_id_2 = os.environ.get("SECRET_FOLDER_ID_DF", None)
     creds_file = os.environ.get("SECRET_CREDS_FILE", None)
     spreadsheet_id_kw = os.environ.get("SPREADSHEET_ID_KW", None)
-
+    
     if not folder_id or not creds_file:
         logger.error("No se pudieron obtener 'folder_id' o 'creds_file' desde los secrets.")
-        return  # Terminamos, pues no hay cómo continuar
+        # return None # Terminamos, pues no hay cómo continuar
+        exit(1)
         
     # 2. Obtener DataFrame desde Google Sheets en una carpeta de Drive
     logger.info(f"Obteniendo datos de la carpeta con ID='{folder_id}'...")
@@ -248,7 +249,8 @@ if __name__ == "__main__":
     )
     if df_key_words is None:
         logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
-        return
+        # return
+        exit(1)
         
     logger.info(f"Obteniendo datos de la carpeta con ID='{folder_id_2}'...")
     combined_df_keys = get_sheets_data_from_folder(
@@ -260,7 +262,8 @@ if __name__ == "__main__":
     )
     if combined_df is None:
         logger.warning("No se obtuvo ningún DataFrame (None). Abortando proceso.")
-        return
+        # return
+        exit(1)
         
     df_key_words_ = get_df_kw(df_key_words)
     keywords_permitidos = [(k,c) for k, c in df_key_words_[['keyword','country']].values]
