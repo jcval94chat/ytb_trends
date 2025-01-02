@@ -1,5 +1,8 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from datetime import timedelta
+import logging
 
 def calculate_daily_stats(df):
   # Convertir la columna `date` a nivel día
