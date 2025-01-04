@@ -129,7 +129,7 @@ def print_trends(pytrends, keywords, countries, timeframes=['now 7-d', 'today 1-
     """
     trends_list = []  # Lista para almacenar los datos de interés por palabra clave
     
-    keywords_chunks = split_list(keywords, 7)
+    keywords_chunks = split_list(keywords, 5)
 
     logger.info(f"Keywords Totales='{str(len(keywords))}'...")
     
