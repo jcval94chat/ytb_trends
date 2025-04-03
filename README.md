@@ -1,4 +1,5 @@
-# Proyecto de Extracción de Datos de YouTube
+# Proyecto de Extracción de Datos de YouTube 
+**(Si no hay actividad en 60 días se desactivan los workflows)**
 
 Este proyecto extrae datos de canales de YouTube y los almacena en una hoja de cálculo de Google Sheets.
 
