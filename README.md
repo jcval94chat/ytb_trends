@@ -3,7 +3,7 @@
 
 Este proyecto extrae datos de canales de YouTube y los almacena en una hoja de cálculo de Google Sheets.
 
-## Requisitos
+## Requisitos:
 
 - Python 3.12.7
 - Clave de API de YouTube (`YOUTUBE_API_KEY`)
