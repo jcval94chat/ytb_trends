@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Análisis técnico — ytb_trends</title>
+  <style>
+    :root{
+      --bg:#0b1020;--bg2:#121a31;--card:#11182b;--text:#e6ecff;--muted:#9fb0d9;--line:#273354;
+      --ok:#4cc38a;--warn:#f0b429;--bad:#ff6b6b;--accent:#6ea8fe;--chip:#1a2440;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(160deg,var(--bg),#0c1326 40%,var(--bg2));color:var(--text)}
+    .wrap{max-width:1150px;margin:0 auto;padding:24px}
+    .hero{padding:28px;border:1px solid var(--line);border-radius:18px;background:rgba(17,24,43,.85);backdrop-filter: blur(4px)}
+    h1,h2,h3{margin:.2rem 0 1rem} h1{font-size:2rem} h2{font-size:1.35rem;margin-top:2rem}
+    p,li{color:var(--muted);line-height:1.55}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .chip{background:var(--chip);border:1px solid var(--line);padding:7px 11px;border-radius:999px;font-size:.86rem;color:#c9d7fb}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{grid-column:span 12;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .two>.card{grid-column:span 6}
+    table{width:100%;border-collapse:collapse;font-size:.9rem}
+    th,td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top}
+    th{text-align:left;color:#cdddff}
+    .k{color:#cdddff;font-weight:600}
+    .callout{padding:12px 14px;border-radius:12px;border:1px solid var(--line);margin:10px 0}
+    .ok{background:rgba(76,195,138,.08);border-color:rgba(76,195,138,.35)}
+    .warn{background:rgba(240,180,41,.09);border-color:rgba(240,180,41,.38)}
+    .bad{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.34)}
+    code{background:#091126;padding:2px 6px;border-radius:6px;color:#b8d1ff}
+    .small{font-size:.88rem}
+    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#0f1b38;border:1px solid var(--line);font-size:.75rem;color:#b7c9f4}
+    @media (max-width:900px){.two>.card{grid-column:span 12} h1{font-size:1.6rem}}
+    svg{max-width:100%;height:auto}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Análisis técnico integral del repositorio <code>ytb_trends</code></h1>
+      <p><strong>Subtítulo:</strong> Pipeline batch en Python que toma históricos de Google Sheets, calcula métricas de tendencias y vuelve a publicar resultados en otras hojas de Google, incorporando extracción de Google Trends por país.</p>
+      <div class="chips">
+        <span class="chip">Tipo: Pipeline ETL/analítica batch</span>
+        <span class="chip">Lenguajes: Python + YAML</span>
+        <span class="chip">Runtime: Python 3.9 (CI) / 3.12.7 (README)</span>
+        <span class="chip">Complejidad: Media</span>
+        <span class="chip">Confianza: Alta (repo pequeño, código legible)</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>1) Resumen ejecutivo</h2>
+      <div class="card">
+        <p>El repositorio automatiza una cadena de procesamiento para detectar y puntuar keywords de YouTube/Trends por país. El flujo principal se ejecuta con <code>google_trends_data.py</code> en GitHub Actions, leyendo datasets históricos desde carpetas de Google Drive (cada archivo es una Google Sheet), preprocesándolos con métricas estadísticas (máximos, medianas, scoring diario/semanal/mensual), consultando Google Trends (pytrends) para keywords seleccionadas y escribiendo salidas a distintas hojas de cálculo. Existe también un workflow de <em>keepalive</em> para evitar inactividad prolongada del repositorio.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2) Arquitectura general</h2>
+      <div class="card">
+        <svg viewBox="0 0 1100 320" role="img" aria-label="Arquitectura">
+          <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#6ea8fe"/></marker></defs>
+          <rect x="25" y="35" width="220" height="95" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="40" y="65" fill="#d7e4ff" font-size="15">Google Drive folder(s)</text>
+          <text x="40" y="88" fill="#9fb0d9" font-size="12">Sheets históricos</text>
+          <rect x="300" y="30" width="255" height="110" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="315" y="60" fill="#d7e4ff" font-size="15">utils/google_utils.py</text>
+          <text x="315" y="84" fill="#9fb0d9" font-size="12">lectura + escritura Sheets</text>
+          <rect x="615" y="30" width="255" height="110" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="630" y="60" fill="#d7e4ff" font-size="15">utils/preprocess_keys.py</text>
+          <text x="630" y="84" fill="#9fb0d9" font-size="12">stats, ranking, scoring</text>
+          <rect x="915" y="35" width="160" height="95" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="928" y="66" fill="#d7e4ff" font-size="15">pytrends API</text>
+          <line x1="245" y1="80" x2="300" y2="80" stroke="#6ea8fe" stroke-width="2" marker-end="url(#a)"/>
+          <line x1="555" y1="80" x2="615" y2="80" stroke="#6ea8fe" stroke-width="2" marker-end="url(#a)"/>
+          <line x1="870" y1="80" x2="915" y2="80" stroke="#6ea8fe" stroke-width="2" marker-end="url(#a)"/>
+          <rect x="320" y="190" width="470" height="95" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="338" y="225" fill="#d7e4ff" font-size="15">google_trends_data.py (orquestador)</text>
+          <text x="338" y="248" fill="#9fb0d9" font-size="12">env vars + auth + composición de datasets + publicación</text>
+          <line x1="790" y1="237" x2="940" y2="237" stroke="#6ea8fe" stroke-width="2" marker-end="url(#a)"/>
+          <rect x="940" y="188" width="145" height="95" rx="12" fill="#13203e" stroke="#2b3d6b"/>
+          <text x="952" y="221" fill="#d7e4ff" font-size="15">Google Sheets</text>
+          <text x="952" y="244" fill="#9fb0d9" font-size="12">outputs finales</text>
+        </svg>
+      </div>
+    </section>
+
+    <section>
+      <h2>3) Flujo completo del dato</h2>
+      <div class="card">
+        <ol>
+          <li><span class="k">Trigger:</span> GitHub Actions programa <code>google_trends_workflow.yml</code> por cron y manual.</li>
+          <li><span class="k">Carga de secretos:</span> CI decodifica credenciales y exporta variables de entorno para carpetas/hojas.</li>
+          <li><span class="k">Entrada principal:</span> <code>google_trends_data.py</code> valida secretos críticos y corta ejecución si faltan.</li>
+          <li><span class="k">Lectura histórica:</span> <code>get_sheets_data_from_folder</code> lista archivos de Drive, filtra por timestamp en nombre y concatena dataframes.</li>
+          <li><span class="k">Transformación analítica:</span> <code>preprocesar_keys</code> deriva métricas diarias, filtra ventana de 60 días, estima punto de corte con histograma y extrae best/worst.</li>
+          <li><span class="k">Selección de keywords:</span> se toma subconjunto permitido desde <code>df_key_words_</code> (umbral por cuantíl sobre <code>mean_interest</code>).</li>
+          <li><span class="k">Extracción Trends:</span> <code>print_trends</code> consulta pytrends por país/periodo en chunks de 5 términos.</li>
+          <li><span class="k">Salida:</span> resultados se escriben en varias hojas de cálculo (keywords, métricas, best/worst).</li>
+          <li><span class="k">Errores/logs:</span> manejo de excepciones con logging + stacktrace; en faltantes críticos usa <code>exit(1)</code>.</li>
+        </ol>
+      </div>
+      <div class="card small">
+        <strong>Diagrama de flujo:</strong>
+        <pre>GitHub Cron/Manual
+   -> google_trends_data.py
+      -> get_sheets_data_from_folder(folder 1) -> df_key_words
+      -> get_sheets_data_from_folder(folder 2) -> combined_df_keys
+      -> preprocesar_keys(combined_df_keys) -> metrics + best/worst
+      -> print_trends(keywords_permitidos, MX/US)
+      -> save_dataframe_to_gsheet + upload_dataframe_to_google_sheet</pre>
+      </div>
+    </section>
+
+    <section>
+      <h2>4) Componentes principales</h2>
+      <div class="card" style="overflow:auto">
+        <table>
+          <thead><tr><th>Componente</th><th>Ruta</th><th>Responsabilidad</th><th>Entradas</th><th>Salidas</th><th>Dependencias</th><th>Criticidad</th></tr></thead>
+          <tbody>
+            <tr><td>Orquestador batch</td><td><code>google_trends_data.py</code></td><td>Coordina IO, preproceso, pytrends y escritura final.</td><td>Env vars + data de Drive + pytrends</td><td>Google Sheets actualizadas</td><td>pandas, pytrends, gspread, utils/*</td><td><span class="tag">Alta</span></td></tr>
+            <tr><td>Conector Google APIs</td><td><code>utils/google_utils.py</code></td><td>Auth, lectura masiva de Sheets, subida de DataFrame.</td><td>credenciales, folder_id, spreadsheet_id</td><td>DataFrame consolidado / cargas</td><td>gspread, googleapiclient, oauth2client</td><td><span class="tag">Alta</span></td></tr>
+            <tr><td>Motor de scoring</td><td><code>utils/preprocess_keys.py</code></td><td>Agregados diarios, top por métricas, best/worst.</td><td>DataFrame histórico crudo</td><td>metrics + subsets</td><td>pandas, numpy, matplotlib</td><td><span class="tag">Alta</span></td></tr>
+            <tr><td>Pipeline CI principal</td><td><code>.github/workflows/google_trends_workflow.yml</code></td><td>Instala deps, prepara credenciales, ejecuta script.</td><td>Secrets de Actions</td><td>Ejecución programada</td><td>GitHub Actions</td><td><span class="tag">Alta</span></td></tr>
+            <tr><td>Keepalive</td><td><code>.github/workflows/keepalive.yml</code></td><td>Hace commit mensual a heartbeat para mantener actividad.</td><td>cron mensual</td><td>update <code>.heartbeat/last-run.txt</code></td><td>git + actions bot</td><td><span class="tag">Media</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <div class="card">
+        <h2>5) Entrypoints reales</h2>
+        <ul>
+          <li><code>python google_trends_data.py</code>: entrypoint de negocio.</li>
+          <li><code>.github/workflows/google_trends_workflow.yml</code>: scheduler y disparador manual.</li>
+          <li><code>.github/workflows/keepalive.yml</code>: job de mantenimiento.</li>
+          <li><strong>Inferencia:</strong> no hay API HTTP, CLI formal ni workers separados; el modelo operativo es batch script.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>6) Interfaces y movimiento de datos</h2>
+        <ul>
+          <li><strong>Google Drive API:</strong> lista archivos por folder (query parents).</li>
+          <li><strong>Google Sheets API (gspread):</strong> lectura worksheet 0 y escritura de tablas completas.</li>
+          <li><strong>Pytrends:</strong> <code>build_payload</code> + <code>interest_over_time</code> + <code>trending_searches</code>.</li>
+          <li><strong>Formato dominante:</strong> DataFrame tabular en memoria; persistencia en Google Sheets.</li>
+          <li><strong>Contrato implícito:</strong> columnas esperadas como <code>date</code>, <code>interest</code>, <code>keyword</code>, <code>country</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>7) Ejecución y despliegue</h2>
+      <div class="card">
+        <ul>
+          <li><strong>Local:</strong> instalar <code>requirements.txt</code> y definir variables de entorno/secrets.</li>
+          <li><strong>CI/CD real:</strong> GitHub Actions en Ubuntu instala dependencias y corre el script principal.</li>
+          <li><strong>Testing:</strong> no existen tests automáticos en repo (ni carpetas <code>tests/</code> ni comandos en workflow).</li>
+          <li><strong>Infra:</strong> no hay Docker, Compose, Terraform, Kubernetes.</li>
+        </ul>
+        <p><strong>Variables críticas detectadas:</strong> <code>SECRET_FOLDER_ID</code>, <code>SECRET_FOLDER_ID_DF</code>, <code>SECRET_CREDS_FILE</code>, <code>GOOGLE_SHEETS_CREDS_BASE64</code>, <code>SPREADSHEET_ID_TRENDS</code>, <code>SPREADSHEET_ID_KEYWORDS</code>, <code>SPREADSHEET_ID_KW</code>, <code>SPREADSHEET_ID_BBDD</code>.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>8) Dependencias importantes</h2>
+      <div class="card">
+        <ul>
+          <li><code>pandas</code>, <code>numpy</code>: transformación y scoring de series temporales.</li>
+          <li><code>pytrends</code>: consumo no oficial de Google Trends.</li>
+          <li><code>gspread</code>, <code>google-api-python-client</code>, <code>oauth2client</code>, <code>google-auth*</code>: integración con Sheets/Drive.</li>
+          <li><code>matplotlib</code>, <code>seaborn</code>: visualización auxiliar (no integrada al pipeline CI).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>9) Caso práctico narrado (E2E)</h2>
+      <div class="card">
+        <p>Un jueves a las 00:00 UTC se dispara el workflow principal. El job descarga el repo, instala dependencias y decodifica <code>credentials.json</code>. El script carga dos carpetas de Drive: una para keywords históricas y otra para dataset base. Con estos datos calcula métricas por día y define un conjunto de keywords candidatas por país (MX/US). Luego consulta Google Trends en ventanas <code>now 7-d</code> y <code>today 1-m</code>, obteniendo series de interés. Finalmente, publica: (1) tabla de interés de keywords por país y tiempo, (2) tablas de best/worst y métricas analíticas en hojas separadas. Si faltan secrets clave o falla autenticación, termina con error y logs detallados.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>10) Riesgos y puntos ciegos</h2>
+      <div class="card">
+        <div class="callout bad"><strong>Hecho confirmado:</strong> no hay suite de pruebas; la calidad depende de ejecución directa en CI y datos reales.</div>
+        <div class="callout warn"><strong>Hecho confirmado:</strong> discrepancia de runtime (README pide Python 3.12.7; workflow usa 3.9), riesgo de incompatibilidades futuras.</div>
+        <div class="callout warn"><strong>Hecho confirmado:</strong> alta dependencia de nombres de archivos con timestamp en Drive (<code>parse_timestamp_from_name</code>), sensible a convenciones manuales.</div>
+        <div class="callout bad"><strong>Hecho confirmado:</strong> el pipeline asume columnas específicas en sheets; no hay validación de esquema formal antes del preproceso.</div>
+        <div class="callout ok"><strong>Inferencia:</strong> el filtrado anti-fútbol extenso puede introducir falsos negativos por matching simple substring.</div>
+        <div class="callout warn"><strong>Inferencia:</strong> pytrends puede presentar rate limiting/intermitencia; hay manejo de excepción, pero no política explícita de reintentos exponenciales.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>11) Evidencia técnica</h2>
+      <div class="card small">
+        <h3>Rutas y piezas citadas</h3>
+        <ul>
+          <li><code>google_trends_data.py</code>: orquestación principal, auth, env vars, escritura final.</li>
+          <li><code>utils/google_utils.py</code>: Drive list/read + upload a Sheets.</li>
+          <li><code>utils/preprocess_keys.py</code>: cálculo de métricas, scoring y selección top.</li>
+          <li><code>.github/workflows/google_trends_workflow.yml</code>: scheduler y ejecución CI.</li>
+          <li><code>.github/workflows/keepalive.yml</code> + <code>.heartbeat/last-run.txt</code>: mantenimiento de actividad.</li>
+          <li><code>requirements.txt</code>: stack técnico efectivo.</li>
+        </ul>
+        <h3>Top 10 archivos para entender el repo rápido</h3>
+        <ol>
+          <li><code>google_trends_data.py</code></li>
+          <li><code>utils/preprocess_keys.py</code></li>
+          <li><code>utils/google_utils.py</code></li>
+          <li><code>.github/workflows/google_trends_workflow.yml</code></li>
+          <li><code>requirements.txt</code></li>
+          <li><code>.github/workflows/keepalive.yml</code></li>
+          <li><code>README.md</code></li>
+          <li><code>.heartbeat/last-run.txt</code></li>
+          <li><code>archivos/a.txt</code> (sin relevancia funcional)</li>
+          <li><code>.git/config</code> (meta del repo, no lógica de negocio)</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // JS inline mínimo para pequeños toques UX (autocontenido)
+    document.querySelectorAll('code').forEach(el=>{el.title='Referencia técnica';});
+  </script>
+</body>
+</html>
